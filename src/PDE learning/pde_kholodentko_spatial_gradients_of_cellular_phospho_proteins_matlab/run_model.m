@@ -18,6 +18,7 @@ sol = pdepe(m,pdefun,icfun,bcfun,xmesh,tspan);
 u = sol(:,:,1);
     
 surf(xmesh,tspan,u)    
-title('Numerical solution computed with 20 mesh points')
-xlabel('Distance x')
-ylabel('Time t')
+title('Numerical solution')
+xlabel('Distance x [m]')
+ylabel('Time t [s]')
+zlabel('Concentration of phosphorylated protein')
