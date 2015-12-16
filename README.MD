@@ -6,7 +6,7 @@ The goal of this project is to build a dynamic model capable of reproducing the 
 
 Preliminary results.
 
-![alt tag](www.googledrive.com/host/0B9UHI73yeJZUfjBDN20zYkFsVDRKREtRcGVqS1VvQ0lhb1BrQmpBT3dJblhWU0VqUDZiWmc/model.png)
+![alt tag]((http://www.googledrive.com/host/0B9UHI73yeJZUfjBDN20zYkFsVDRKREtRcGVqS1VvQ0lhb1BrQmpBT3dJblhWU0VqUDZiWmc/model.png)
 
 [^1]: Maeder, Celine I., et al. "Spatial regulation of Fus3 MAP kinase activity through a reaction-diffusion mechanism in yeast pheromone signalling." Nature Cell Biology 9.11 (2007): 1319-1326.
 
