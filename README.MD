@@ -4,6 +4,10 @@ Yeast, or Saccharomyces cerevisia responds to mating pheromone with the help of 
 
 The goal of this project is to build a dynamic model capable of reproducing the observed activity gradient in the mating pathway of yeast [^1].
 
+Preliminary results.
+
+![alt tag](https://drive.google.com/file/d/0B9UHI73yeJZUTFVwRnMtcDRRRVE)
+
 [^1]: Maeder, Celine I., et al. "Spatial regulation of Fus3 MAP kinase activity through a reaction-diffusion mechanism in yeast pheromone signalling." Nature Cell Biology 9.11 (2007): 1319-1326.
 
 
