@@ -1,24 +1,54 @@
-
-R = 10^-5;%sphere radius
-D = 5*10^-12;%diffusion constant of the phosphorylated protein
-pR = 1;%initial condition of the phosphorylated protein at the membrane p(x=R,t=0)
-kp = 0;%rate of de-phosphorylation
-
-xmesh = linspace(0,R,100);
-tspan = linspace(0,5,20);
-
-m = 2;
-
-pdefun = @(x,t,u,DuDx) pdex1pde(x,t,u,DuDx,D,kp);%actual PDE
-icfun = @(x) pdex1ic(x);%initial conditions
-bcfun = @(xl,ul,xr,ur,t) pdex1bc(xl,ul,xr,ur,t,D,pR);%boundary conditions
-
-sol = pdepe(m,pdefun,icfun,bcfun,xmesh,tspan);
-
-u = sol(:,:,1);
+function [r,t,sol,u,steady_state,half_fraction] = run_model(time_steps,end_time,spatial_steps,R,D,p0,ka,kp)
+    %for a description of the model see readme
+    %
+    %parameters
+    %time_steps,spatial_steps - number of discretization steps in time,space respectively (higher values better precision and
+    %smoother solutions but longer running time
+    %end_time - the system solutions at times 0 [s] - end_time [s] are
+    %calculated
+    %R - cell radius
+    %D - diffusion constant of the phosphorylated protein
+    %p0 - initial concentration of protein (all unphosphorylated)
+    %kp - rate of de-phosphorylation
+    %ka - rate of activation (phosphorylation)
+    %
+    %returns
+    %r - the spatial grid (one dimensional array with `spatial_steps` elements - elements E [0,R]
+    %t - time grid (one dimensional array with `time_steps` elements- elements E [0,end_time]
+    %sol - the solution of the system of PDEs for each point - (r,t) (three
+    %dimensional matrix - where axis1 = space, axis2 = time and axis3 =
+    %variable (unphosphorylated or phosphorylated protein)
+    %u - fraction of phosphorulated protein at each point (r,t) (two
+    %dimensional matrix with values E [0,1]
+    %steady state - the fraction of phosphorylated proteins at t=end_time
+    %(one dimensional array - each value corresponds to a point in space)
+    %half_fraction - the value of `r`/R where the fraction of phosphorylated
+    %protein is half of the fraction at the cell membrane e [0,1] - values
+    %of 1 would mean an extreme gradient where al the phosphorylated
+    %protein is at the membrane, and value of 0 would mean that
+    %phosphorylated protein is uniformly distributed throught the cell
+        
+    xmesh = linspace(0,R,spatial_steps);
+    tspan = linspace(0,end_time,time_steps);
     
-surf(xmesh,tspan,u)    
-title('Numerical solution')
-xlabel('Distance x [m]')
-ylabel('Time t [s]')
-zlabel('Concentration of phosphorylated protein')
+    m = 2;
+    pdefun = @(x,t,u,DuDx) pdex1pde(x,t,u,DuDx,D,kp,ka,R);%actual PDE
+    icfun = @(x) pdex1ic(x,p0);%initial conditions
+    bcfun = @(xl,ul,xr,ur,t) pdex1bc(xl,ul,xr,ur,t);%boundary conditions
+
+    sol = pdepe(m,pdefun,icfun,bcfun,xmesh,tspan);
+
+    u = sol(:,:,2)./(sol(:,:,2)+sol(:,:,1));
+
+
+    steady_state = u(end,:);
+    half = 1;
+    for k=1:length(xmesh)
+        if steady_state(k) < steady_state(end)/2
+            half = k;
+        end
+    end
+    half_fraction = xmesh(half)/R;
+    r = xmesh;
+    t = tspan;
+end
