@@ -10,6 +10,7 @@ classdef ModelOutput < handle
         steady_state = -1;
         half_fraction = -1;
         R = -1;
+        time_scale = 's';
     end
     
     methods
@@ -22,51 +23,92 @@ classdef ModelOutput < handle
             self.steady_state = steady_state;
             self.half_fraction = half_fraction;
             self.R = model.R;
+            if self.tspan(end) > 1000
+               self.tspan = tspan./60;
+               self.time_scale = 'min';
+            end
+        end
+        
+        function plot_all(self)
+           set(0,'DefaultAxesFontSize',20)
+           set(0,'DefaultTextFontSize',20)
+           figure('Position', [100, 100, 3000, 695]);
+           subplot(1,3,1)
+           self.plot_fraction_internal()
+           title('')
+           subplot(1,3,2)
+           self.plot_fraction_steady_state_internal()
+           title('Steady state')
+           subplot(1,3,3)
+           self.plot_average_fraction_internal()
+           title('Cell average')
+           export_fig(self.get_model_name(),'-png','-transparent','-r300')
         end
         
         function plot_fraction(self)
-            self.initfigure()
-            surf(self.xmesh,self.tspan,self.fraction_active_protein,'EdgeColor','none');   
-            self.correct_x_axis();
+           self.initfigure()
+           self.plot_fraction_internal()
+        end
+        
+        function model_name = get_model_name(self)
             model_meta = metaclass(self.model);
-            title(model_meta.Name);
-            xlabel('Distance from cell membrane [\mum]');
-            ylabel('Time [s]');
-            zlabel('Fraction of phosphorylated protein');
-            colorbar;
+            model_name = model_meta.Name;
+        end
+        
+        function plot_fraction_internal(self)
+            surf(self.xmesh,self.tspan,fliplr(self.fraction_active_protein),'EdgeColor','none');   
+            self.correct_x_axis();
+            title(self.get_model_name());
+            xlabel({'Distance from','plasma membrane [\mum]'});
+            ylim([0 max(self.tspan)])
+            ylabel(strcat('Time [',self.time_scale,']'));
+            zlabel('Fraction of active protein');
+            %colorbar;
+            view([50 52]);
         end
         
         function plot_fraction_steady_state(self)
             self.initfigure()
-            plot(self.xmesh,self.fraction_active_protein(end,:));
+            self.plot_fraction_steady_state_internal()
+        end
+            
+        function plot_fraction_steady_state_internal(self)
+            plot(self.xmesh,fliplr(self.fraction_active_protein(end,:)));
             self.correct_x_axis();
-            model_meta = metaclass(self.model);
-            title(strcat(model_meta.Name,' - Steady state'));
-            xlabel('Distance from cell membrane [\mum]');
-            ylabel('Fraction of phosphorylated protein');
+            title(strcat(self.get_model_name(),' - Steady state'));
+            xlabel('Distance from plasma membrane [\mum]');
+            ylabel('Fraction of active protein');
+            grid on
         end
         
         function plot_average_fraction(self)
             self.initfigure()
+            self.plot_average_fraction_internal()
+        end
+        
+        function plot_average_fraction_internal(self)
             average = squeeze(mean(self.sol,2));
             plot(self.tspan,average(:,2)./(average(:,2)+average(:,1)));
-            model_meta = metaclass(self.model);
-            title(strcat(model_meta.Name,' - Average fraction in the cell'));
-            xlabel('Time [s]');
-            ylabel('Fraction of phosphorylated protein');
+            title(strcat(self.get_model_name(),' - Average fraction in the cell'));
+            xlabel(strcat('Time [',self.time_scale,']'));
+            ylabel('Fraction of active protein');
+            grid on
         end
         
         function correct_x_axis(self)
-            ticks = 0:self.R/10:self.R;
+            ticks = 0:self.R/5:self.R;
             tick_labels = cell(length(ticks),1);
             for i=1:length(ticks)
-                tick_labels{length(ticks)-i+1} = sprintf('%.0f',ticks(i)/self.R*10);
+                tick_labels{i} = sprintf('%.0f',ticks(i)/self.R*10);
             end
-            set(gca,'Xtick',ticks,'XTickLabel',tick_labels)
+            tick_labels{1} = 'PM';
+            tick_labels{length(tick_labels)} = 'NM';
+            set(gca,'XTick',ticks,'XTickLabel',tick_labels)
         end
-        
+                
         function initfigure(self)
             figure('Position', [100, 100, 1500, 895]);
+            
         end
     end
     
