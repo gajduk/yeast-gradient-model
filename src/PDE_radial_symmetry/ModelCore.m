@@ -35,7 +35,7 @@ classdef (Abstract) ModelCore
             steady_state = u(end,:);
             half = 1;
             for k=1:length(xmesh)
-                if steady_state(k) < steady_state(end)/2
+                if steady_state(k)-steady_state(1) < (steady_state(end)-steady_state(1))/2
                     half = k;
                 end
             end

@@ -8,9 +8,13 @@ classdef InDirectNegativeFeedbackTwoProteinForms < ModelCore
         phos0 = 50;%[nM] initial concentration of phospatases
         phos_max = InDirectNegativeFeedbackTwoProteinForms.phos0*4;%[nM] maximal concentration of phosphatases
         phos_regulation_rate = .002;% - the speed of phosphatase dynamics
-        kp = .003;%s^-1 rate of de-phosphorylation
         ka = .008;%s^-1 rate of activation (phosphorylation)
         A = 1;% strength of the feedback (a free parameter).
+    end
+    
+    properties
+        kp = .003;%s^-1 rate of de-phosphorylation
+        
     end
     
     methods
@@ -43,8 +47,59 @@ classdef InDirectNegativeFeedbackTwoProteinForms < ModelCore
             ql = [1; 1; 1];
             pr = [0; 0; 0];
             qr = [1; 1; 1];
-        end
+       end
 
+    end
+    methods(Static)
+        function sensitivity_analysis_kp()
+            close all
+            time_steps = 500;
+            end_time = 7200;
+            spatial_steps = 500;
+            kps = 10.^(-4:.4:4);
+            res = zeros(length(kps),1);
+            temp = InDirectNegativeFeedbackTwoProteinForms();
+            initial_kp = temp.kp;
+            
+            parfor i=1:length(kps)
+                model = InDirectNegativeFeedbackTwoProteinForms();
+                model.kp = initial_kp*kps(i);
+                output = model.run(time_steps,end_time,spatial_steps);
+                res(i) = output.half_fraction;
+            end
+            
+            figure('Position', [100, 100, 400, 400]);
+            semilogx(kps,res);
+            xlabel({'Regulation rate strength','relative to default'})
+            ylabel({'Half fraction at steady state','Higher values <=> steeper gradient'})
+            grid on
+            export_fig('sensitivity_analysis_kp','-png','-transparent','-r300')
+        end
+        function sensitivity_analysis_kp_sample()
+            close all
+            time_steps = 1000;
+            end_time = 7200;
+            spatial_steps = 50;
+            kps = [0.01,0.1,0.4,4,10,100];
+            res = cell(length(kps),1);
+            temp = InDirectNegativeFeedbackTwoProteinForms();
+            initial_kp = temp.kp;
+            
+            parfor i=1:length(kps)
+                model = InDirectNegativeFeedbackTwoProteinForms();
+                model.kp = initial_kp*kps(i);
+                output = model.run(time_steps,end_time,spatial_steps);
+                res{i} = output;
+            end
+            
+            figure('Position', [100, 100, 880, 400]);
+            for i=1:6
+                subplot(2,3,i)
+                res{i}.plot_fraction_steady_state_internal();
+                title(sprintf('k_d = %.2f k_d^0',kps(i)));
+            end
+            export_fig('sensitivity_analysis_kp_sample','-png','-transparent','-r300')
+        end
     end
     
 end

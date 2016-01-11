@@ -1,7 +1,14 @@
 close all
-time_steps = 500;
-end_time = 30;
-spatial_steps = 100;
-model = DirectNegativeFeedbackTwoProteinForms();
-output = model.run(time_steps,end_time,spatial_steps);
-output.plot_all()
+spatial_steps = 50;
+models = {InDirectNegativeFeedbackTwoProteinForms(),
+          DirectNegativeFeedbackTwoProteinForms(),
+          BasicModelTwoProteinForms()};
+end_times = [7200,30,5];
+
+%for i=1:3
+%    end_time = end_times(i);
+%    time_steps = 500;
+%    output = models{i}.run(time_steps,end_time,spatial_steps);
+%    output.plot_all()
+%end
+InDirectNegativeFeedbackTwoProteinForms.sensitivity_analysis_kp_sample()

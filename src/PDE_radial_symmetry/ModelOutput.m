@@ -30,9 +30,9 @@ classdef ModelOutput < handle
         end
         
         function plot_all(self)
-           set(0,'DefaultAxesFontSize',20)
-           set(0,'DefaultTextFontSize',20)
-           figure('Position', [100, 100, 3000, 695]);
+           set(0,'DefaultAxesFontSize',9)
+           set(0,'DefaultTextFontSize',9)
+           figure('Position', [100, 100, 900, 196]);
            subplot(1,3,1)
            self.plot_fraction_internal()
            title('')
@@ -92,6 +92,7 @@ classdef ModelOutput < handle
             title(strcat(self.get_model_name(),' - Average fraction in the cell'));
             xlabel(strcat('Time [',self.time_scale,']'));
             ylabel('Fraction of active protein');
+            xlim([0 max(self.tspan)])
             grid on
         end
         
