@@ -1,3 +1,4 @@
+
 classdef InDirectNegativeFeedbackTwoProteinForms < ModelCore
     %DirectNegativeFeedbackTwoProteinForms
     %See https://www.overleaf.com/2061351vhqrxw#/5221863/ - label phosphatase negative feedback
@@ -75,12 +76,15 @@ classdef InDirectNegativeFeedbackTwoProteinForms < ModelCore
             grid on
             export_fig('sensitivity_analysis_kp','-png','-transparent','-r300')
         end
+        
         function sensitivity_analysis_kp_sample()
             close all
             time_steps = 1000;
             end_time = 7200;
             spatial_steps = 50;
-            kps = [0.01,0.1,0.4,4,10,100];
+            kps = [0.01,0.1,0.4,1,4,10,100];
+            
+            %run models for each value in kps
             res = cell(length(kps),1);
             temp = InDirectNegativeFeedbackTwoProteinForms();
             initial_kp = temp.kp;
@@ -92,12 +96,28 @@ classdef InDirectNegativeFeedbackTwoProteinForms < ModelCore
                 res{i} = output;
             end
             
-            figure('Position', [100, 100, 880, 400]);
-            for i=1:6
-                subplot(2,3,i)
-                res{i}.plot_fraction_steady_state_internal();
-                title(sprintf('k_d = %.2f k_d^0',kps(i)));
+            figure('Position', [100, 100, 650, 220]);
+            %plot the gradients at steady state 
+            subplot('Position',[0.1, 0.2,0.25,0.7]);
+            legend_labels = cell(1,length(res));
+            for i=1:length(res)
+                res{i}.plot_fraction_steady_state_internal(true);
+                legend_labels{i} = sprintf('k_d = %.2f k^0_d',kps(i));
+                hold on
             end
+            title('Steady state');
+            
+            %plot the time profiles
+            subplot('Position',[0.45, 0.2,0.50,0.7]);
+            for i=1:length(res)
+                res{i}.plot_average_fraction_internal(true);
+                hold on
+            end
+            xlim([0 30])
+            title('Cell average');
+            grid on
+            
+            legend(legend_labels,'Location','eastoutside');
             export_fig('sensitivity_analysis_kp_sample','-png','-transparent','-r300')
         end
     end

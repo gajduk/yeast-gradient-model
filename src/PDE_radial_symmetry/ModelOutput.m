@@ -72,12 +72,24 @@ classdef ModelOutput < handle
             self.plot_fraction_steady_state_internal()
         end
             
-        function plot_fraction_steady_state_internal(self)
-            plot(self.xmesh,fliplr(self.fraction_active_protein(end,:)));
+        function plot_fraction_steady_state_internal(self,normalized_param)
+            normalized = false;
+            if nargin > 1
+                normalized = normalized_param;
+            end
+            y = fliplr(self.fraction_active_protein(end,:));
+            if normalized
+                y = y./self.fraction_active_protein(end,end);
+            end
+            plot(self.xmesh,y);
             self.correct_x_axis();
             title(strcat(self.get_model_name(),' - Steady state'));
             xlabel('Distance from plasma membrane [\mum]');
-            ylabel('Fraction of active protein');
+            if normalized
+                ylabel({'Fraction of active protein','Normalized to fraction at PM'});
+            else
+                ylabel('Fraction of active protein');
+            end
             grid on
         end
         
@@ -86,12 +98,25 @@ classdef ModelOutput < handle
             self.plot_average_fraction_internal()
         end
         
-        function plot_average_fraction_internal(self)
+        function plot_average_fraction_internal(self,normalized_param)
+            normalized = false;
+            if nargin > 1
+                normalized = normalized_param;
+            end
             average = squeeze(mean(self.sol,2));
-            plot(self.tspan,average(:,2)./(average(:,2)+average(:,1)));
+            y = average(:,2)./(average(:,2)+average(:,1));
+            if normalized
+                y = y./y(end);
+            end
+            plot(self.tspan,y);
             title(strcat(self.get_model_name(),' - Average fraction in the cell'));
             xlabel(strcat('Time [',self.time_scale,']'));
             ylabel('Fraction of active protein');
+            if normalized
+                ylabel({'Fraction of active protein','Normalized to avg fraction at SS'});
+            else
+                ylabel('Fraction of active protein');
+            end
             xlim([0 max(self.tspan)])
             grid on
         end
