@@ -113,7 +113,7 @@ classdef ModelOutput < handle
             xlabel(strcat('Time [',self.time_scale,']'));
             ylabel('Fraction of active protein');
             if normalized
-                ylabel({'Fraction of active protein','Normalized to avg fraction at SS'});
+                ylabel({'Fraction of active protein','Normalized to avg at SS'});
             else
                 ylabel('Fraction of active protein');
             end
@@ -130,6 +130,19 @@ classdef ModelOutput < handle
             tick_labels{1} = 'PM';
             tick_labels{length(tick_labels)} = 'NM';
             set(gca,'XTick',ticks,'XTickLabel',tick_labels)
+        end
+        
+        function res = highest_fraction(self)
+            average = squeeze(mean(self.sol,2));
+            y = average(:,2)./(average(:,2)+average(:,1));
+            y = y./y(end);
+            res = max(y);
+        end
+        
+        function res = transient_time(self)
+            average = squeeze(mean(self.sol,2));
+            y = average(:,2)./(average(:,2)+average(:,1));
+            res = self.tspan(y==max(y));
         end
                 
         function initfigure(self)

@@ -11,4 +11,4 @@ end_times = [7200,30,5];
 %    output = models{i}.run(time_steps,end_time,spatial_steps);
 %    output.plot_all()
 %end
-InDirectNegativeFeedbackTwoProteinForms.sensitivity_analysis_kp_sample()
+InDirectNegativeFeedbackTwoProteinForms.sensitivity_analysis_kp()

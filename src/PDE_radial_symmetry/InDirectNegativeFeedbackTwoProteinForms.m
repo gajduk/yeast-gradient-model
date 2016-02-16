@@ -54,11 +54,13 @@ classdef InDirectNegativeFeedbackTwoProteinForms < ModelCore
     methods(Static)
         function sensitivity_analysis_kp()
             close all
-            time_steps = 500;
+            time_steps = 2000;
             end_time = 7200;
             spatial_steps = 500;
-            kps = 10.^(-4:.4:4);
-            res = zeros(length(kps),1);
+            kps = 10.^(-4:.05:4);
+            half_fractions = zeros(length(kps),1);
+            highest_fraction = zeros(length(kps),1);
+            transient_time = zeros(length(kps),1);
             temp = InDirectNegativeFeedbackTwoProteinForms();
             initial_kp = temp.kp;
             
@@ -66,15 +68,43 @@ classdef InDirectNegativeFeedbackTwoProteinForms < ModelCore
                 model = InDirectNegativeFeedbackTwoProteinForms();
                 model.kp = initial_kp*kps(i);
                 output = model.run(time_steps,end_time,spatial_steps);
-                res(i) = output.half_fraction;
+                half_fractions(i) = output.half_fraction;
+                highest_fraction(i) = output.highest_fraction();
+                transient_time(i) = output.transient_time();
             end
             
-            figure('Position', [100, 100, 400, 400]);
-            semilogx(kps,res);
+            figure('Position', [100, 100, 800, 270]);
+            subplot(1,3,1);
+            semilogx(kps,half_fractions);
             xlabel({'Regulation rate strength','relative to default'})
-            ylabel({'Half fraction at steady state','Higher values <=> steeper gradient'})
+            ylabel({'Half fraction at SS','higher values \Rightarrow steeper gradient'})
+            xlim([min(kps),max(kps)])
+            ax = gca;
+            ax.XTick = [10^-4,10^-2,1,10^2,10^4];
+            ax.XTickLabel = {'10^{-4}','10^{-2}','10^{0}','10^{2}','10^{4}'};
             grid on
-            export_fig('sensitivity_analysis_kp','-png','-transparent','-r300')
+            
+            subplot(1,3,2);
+            loglog(kps,highest_fraction);
+            xlabel({'Regulation rate strength','relative to default'})
+            ylabel({'Peak fraction','Normalized to avg at SS'})
+            xlim([min(kps),max(kps)])
+            ax = gca;
+            ax.XTick = [10^-4,10^-2,1,10^2,10^4];
+            ax.XTickLabel = {'10^{-4}','10^{-2}','10^{0}','10^{2}','10^{4}'};
+            grid on
+            
+            subplot(1,3,3);
+            loglog(kps,transient_time);
+            xlabel({'Regulation rate strength','relative to default'})
+            ylabel('Peak time [min]')
+            xlim([min(kps),max(kps)])
+            ax = gca;
+            ax.XTick = [10^-4,10^-2,1,10^2,10^4];
+            ax.XTickLabel = {'10^{-4}','10^{-2}','10^{0}','10^{2}','10^{4}'};
+            grid on
+            
+            export_fig('sensitivity_analysis_kp1','-png','-transparent','-r300')
         end
         
         function sensitivity_analysis_kp_sample()
@@ -82,7 +112,7 @@ classdef InDirectNegativeFeedbackTwoProteinForms < ModelCore
             time_steps = 1000;
             end_time = 7200;
             spatial_steps = 50;
-            kps = [0.01,0.1,0.4,1,4,10,100];
+            kps = [0.01,0.1,0.3,1,3,10,100];
             
             %run models for each value in kps
             res = cell(length(kps),1);
