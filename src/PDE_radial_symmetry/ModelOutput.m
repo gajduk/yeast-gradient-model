@@ -55,6 +55,48 @@ classdef ModelOutput < handle
             model_name = model_meta.Name;
         end
         
+        function plot_phosphatase_internal(self)
+            surf(self.xmesh,self.tspan,fliplr(self.sol(:,:,4)./(self.sol(:,:,3)+self.sol(:,:,4))),'EdgeColor','none');   
+            self.correct_x_axis();
+            title(self.get_model_name());
+            xlabel({'Distance from','plasma membrane [\mum]'});
+            ylim([0 max(self.tspan)])
+            ylabel(strcat('Time [',self.time_scale,']'));
+            zlabel('Fraction of active protein');
+            %colorbar;
+            view([50 52]);
+        end
+        
+        function plot_erk_internal(self)
+            surf(self.xmesh,self.tspan,fliplr(self.sol(:,:,6)./(self.sol(:,:,5)+self.sol(:,:,6))),'EdgeColor','none');   
+            self.correct_x_axis();
+            title(self.get_model_name());
+            xlabel({'Distance from','plasma membrane [\mum]'});
+            ylim([0 max(self.tspan)])
+            ylabel(strcat('Time [',self.time_scale,']'));
+            zlabel('Fraction of active protein');
+            %colorbar;
+            view([50 52]);
+        end
+        
+        function plot_all_sol(self)
+            [~,~,sols_len] = size(self.sol);
+            figure;
+            for idx=1:sols_len
+                subplot(1,sols_len,idx);
+                surf(self.xmesh,self.tspan,fliplr(self.sol(:,:,idx)),'EdgeColor','none');   
+                self.correct_x_axis();
+                title(self.get_model_name());
+                xlabel({'Distance from','plasma membrane [\mum]'});
+                ylim([0 max(self.tspan)])
+                ylabel(strcat('Time [',self.time_scale,']'));
+                zlabel('Fraction of active protein');
+            %colorbar;
+                view([50 52]);
+            end
+        end
+        
+        
         function plot_fraction_internal(self)
             surf(self.xmesh,self.tspan,fliplr(self.fraction_active_protein),'EdgeColor','none');   
             self.correct_x_axis();
