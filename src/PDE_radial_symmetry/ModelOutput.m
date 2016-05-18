@@ -62,23 +62,11 @@ classdef ModelOutput < handle
             xlabel({'Distance from','plasma membrane [\mum]'});
             ylim([0 max(self.tspan)])
             ylabel(strcat('Time [',self.time_scale,']'));
-            zlabel('Fraction of active protein');
+            zlabel('Fraction of active phosphatase');
             %colorbar;
             view([50 52]);
         end
-        
-        function plot_erk_internal(self)
-            surf(self.xmesh,self.tspan,fliplr(self.sol(:,:,6)./(self.sol(:,:,5)+self.sol(:,:,6))),'EdgeColor','none');   
-            self.correct_x_axis();
-            title(self.get_model_name());
-            xlabel({'Distance from','plasma membrane [\mum]'});
-            ylim([0 max(self.tspan)])
-            ylabel(strcat('Time [',self.time_scale,']'));
-            zlabel('Fraction of active protein');
-            %colorbar;
-            view([50 52]);
-        end
-        
+                
         function plot_all_sol(self)
             [~,~,sols_len] = size(self.sol);
             figure;

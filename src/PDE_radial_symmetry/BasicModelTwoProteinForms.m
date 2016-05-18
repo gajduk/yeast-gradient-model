@@ -13,7 +13,7 @@ classdef BasicModelTwoProteinForms < ModelCore
        function [c,f,s] = pde_fun(self,x,t,u,DuDx)
             p = u(1);%unphosphorylated form of the protein
             pa = u(2);%active - phosphorylated form of the protein
-            ea = self.ka*x^10/self.R^10;%effective rate of activation
+            ea = self.ka*self.get_kinease_activity_normalizer(x,self.R);%effective rate of activation
             c = [1; 1];
             f = [self.D; self.D].*DuDx;
             s = [2*self.D/x; 2*self.D/x].*DuDx+[self.kp*pa-ea*p;-self.kp*pa+ea*p];

@@ -1,58 +1,71 @@
 
-classdef AutocatalyticNegativeFeedbackTwoProteinForms < ModelCore
-    %DirectNegativeFeedbackTwoProteinForms
-    %See https://www.overleaf.com/2061351vhqrxw#/5221863/ - label phosphatase negative feedback
-    properties (Constant)
-        R = 1;%sphere radius
-        D = 5*10^-3;%diffusion constant of the phosphorylated protein
-        p0 = 1;%[nM]initial concentration of protein (all unphosphorylated)
-        phos0 = 1;%[nM] initial concentration of phospatases (all unactive)
-    end
-    
+classdef MMInDirectNegativeFeedbackTwoProteinForms < ModelCore
+    %InDirectNegativeFeedbackTwoProteinForms
+    %with michaelis Menten kinetics
+    %See https://www.overleaf.com/2061351vhqrxw#/5221863/ - label michaelis
+    %menten first TAC
     properties
-        ka = 0;%s^-1 rate of activation (phosphorylation)
-        kp = .5;%s^-1 rate of de-phosphorylation
-        
-        kac = 1.5;%s^-1 autocatalytic activation
-        kan = 0;%s^-1 autonomous activation
-        
-        phos_ka = .3;%phosphataset activation
-        phos_kd = .1;%phosphatase de-activation
-        
+        R = 10^-5;%sphere radius
+        D = 5*10^-12;%diffusion constant of the phosphorylated protein
+        p0 = 300;%[nM] total concentration of protein
+        phos0 = 200;%[nM] total concentration of phospatases
+        V_kin_max = 50;%[nM/s]
+        V_phos_max = 15;%[nM/s]
+        V_act_max = 2;%[nM/s]
+        V_dea_max = 5;%[nM/s]
+        A1 = 50;
+        A2 = 2;
+        KM1
+        KM2
+        KM3
+        KM4
+        KM5
+        KM6
     end
-    
+        
     methods
+        
+       function self = MMInDirectNegativeFeedbackTwoProteinForms()
+            self.KM1 = self.p0/2;
+            self.KM2 = self.p0/2;
+            self.KM3 = self.phos0/2;
+            self.KM4 = self.phos0/2;
+            self.KM5 = self.p0/2;
+            self.KM6 = self.phos0/2;
+       end
+       
        function [c,f,s] = pde_fun(self,x,t,u,DuDx)
+
             p = u(1);%unphosphorylated form of the protein
             pa = u(2);%active - phosphorylated form of the protein
-            phos = u(3);%non-active phosphatase
-            phosa = u(4);%active phosphatase
-            ea = self.ka*p;% * x^20 * (sin(t/3)+1);
-            d = .2;%rate fo diffusion of protein compared to phosphatase
+            phos = u(3);%inactive phophatases
+            phos_a = u(4);%active phoshatases
             
+            v_kin = self.V_kin_max*(p./(self.KM1+p));
+            v_phos = self.V_phos_max*(pa./(self.KM2+pa)).*((1+self.A1*phos_a/self.KM3)./(1+phos_a/self.KM3));
+
+            v_kin = v_kin*self.get_kinease_activity_normalizer(x,self.R);
+            
+            v_act = self.V_act_max*(phos./(self.KM4+phos)).*((1+self.A2*pa/self.KM5)./(1+pa/self.KM5));
+            
+            v_dea = self.V_dea_max*(phos_a./(self.KM6+phos_a));
+
             c = [1; 1; 1; 1];
-            f = [d*self.D; d*self.D; self.D; self.D].*DuDx;
-            s = [d*2*self.D/x; d*2*self.D/x; 2*self.D/x; 2*self.D/x].*DuDx;
-            %%     autonomous       autocatalytic    phosphorylation   activation
-            s = s+[ -self.kan * p - self.kac * pa * p + self.kp*pa*phosa - ea;%non-active protein
-                    +self.kan * p + self.kac * pa * p - self.kp*pa*phosa + ea;%active protein
-              ... %  phos activation          phos DE-activation
-                    -self.phos_ka*pa*phos + self.phos_kd*phosa;%phosphotases
-                     self.phos_ka*pa*phos - self.phos_kd*phosa];%active phosphotases
+            f = [self.D; self.D; self.D; self.D].*DuDx;
+            s = [2*self.D/x; 2*self.D/x; 2*self.D/x; 2*self.D/x].*DuDx;
+            s = s+[ -v_kin+v_phos;%non-active protein
+                    +v_kin-v_phos;%active protein
+                    -v_act+v_dea;
+                    +v_act-v_dea];%phosphotases
        end
        
        function u0 = ic_fun(self,x)
-           if x > self.R*0.48 && x < self.R*0.52
-               p = 0.5+rand()/20;
-               phos = 0.25+rand()/20;
-               u0 = [self.p0*(1-p); self.p0*p; self.phos0*(1-phos); self.phos0*phos];
-           else
-               u0 = [self.p0; 0; self.phos0; 0];
-           end
-           %u0 = [self.p0; 0; self.phos0; 0];
+            u0 = [self.p0; 0; self.phos0; 0];
        end
        
        function [pl,ql,pr,qr] = bc_fun(self,xl,ul,xr,ur,t)
+            % pR is a constant and the initial concentration of phosphorylated protein at the membrane
+            % D - diffusion constant
             % pl and ql correspond to the left boundary conditions (x = 0), and 
             % pr and qr correspond to the right boundary condition (x = R).
             pl = [0; 0; 0; 0];
@@ -63,21 +76,20 @@ classdef AutocatalyticNegativeFeedbackTwoProteinForms < ModelCore
 
     end
     methods(Static)
-        function sensitivity_analysis_kp()
+        function sensitivity_analysis_A1()
             close all
-            time_steps = 2000;
-            end_time = 7200;
+            time_steps = 3000;
+            end_time = 100;
             spatial_steps = 500;
-            kps = 10.^(-4:.05:4);
-            half_fractions = zeros(length(kps),1);
-            highest_fraction = zeros(length(kps),1);
-            transient_time = zeros(length(kps),1);
-            temp = InDirectNegativeFeedbackTwoProteinForms();
-            initial_kp = temp.kp;
+            A1s = 10.^(-6:.1:6);
+            half_fractions = zeros(length(A1s),1);
+            highest_fraction = zeros(length(A1s),1);
+            transient_time = zeros(length(A1s),1);
+            initial_kp = 1;
             
-            parfor i=1:length(kps)
-                model = InDirectNegativeFeedbackTwoProteinForms();
-                model.kp = initial_kp*kps(i);
+            parfor i=1:length(A1s)
+                model = MMInDirectNegativeFeedbackTwoProteinForms();
+                model.A1 = initial_kp*A1s(i);
                 output = model.run(time_steps,end_time,spatial_steps);
                 half_fractions(i) = output.half_fraction;
                 highest_fraction(i) = output.highest_fraction();
@@ -86,36 +98,36 @@ classdef AutocatalyticNegativeFeedbackTwoProteinForms < ModelCore
             
             figure('Position', [100, 100, 800, 270]);
             subplot(1,3,1);
-            semilogx(kps,half_fractions);
+            semilogx(A1s,half_fractions);
             xlabel({'Regulation rate strength','relative to default'})
             ylabel({'Half fraction at SS','higher values \Rightarrow steeper gradient'})
-            xlim([min(kps),max(kps)])
+            xlim([min(A1s),max(A1s)])
             ax = gca;
-            ax.XTick = [10^-4,10^-2,1,10^2,10^4];
-            ax.XTickLabel = {'10^{-4}','10^{-2}','10^{0}','10^{2}','10^{4}'};
+            ax.XTick = [10^-6,10^-3,1,10^3,10^6];
+            ax.XTickLabel = {'10^{-6}','10^{-3}','10^{0}','10^{3}','10^{6}'};
             grid on
             
             subplot(1,3,2);
-            loglog(kps,highest_fraction);
+            loglog(A1s,highest_fraction);
             xlabel({'Regulation rate strength','relative to default'})
             ylabel({'Peak fraction','Normalized to avg at SS'})
-            xlim([min(kps),max(kps)])
+            xlim([min(A1s),max(A1s)])
             ax = gca;
-            ax.XTick = [10^-4,10^-2,1,10^2,10^4];
-            ax.XTickLabel = {'10^{-4}','10^{-2}','10^{0}','10^{2}','10^{4}'};
+            ax.XTick = [10^-6,10^-3,1,10^3,10^6];
+            ax.XTickLabel = {'10^{-6}','10^{-3}','10^{0}','10^{3}','10^{6}'};
             grid on
             
             subplot(1,3,3);
-            loglog(kps,transient_time);
+            loglog(A1s,transient_time);
             xlabel({'Regulation rate strength','relative to default'})
             ylabel('Peak time [min]')
-            xlim([min(kps),max(kps)])
+            xlim([min(A1s),max(A1s)])
             ax = gca;
-            ax.XTick = [10^-4,10^-2,1,10^2,10^4];
-            ax.XTickLabel = {'10^{-4}','10^{-2}','10^{0}','10^{2}','10^{4}'};
+            ax.XTick = [10^-6,10^-3,1,10^3,10^6];
+            ax.XTickLabel = {'10^{-6}','10^{-3}','10^{0}','10^{3}','10^{6}'};
             grid on
             
-            export_fig('sensitivity_analysis_kp1','-png','-transparent','-r300')
+            export_fig('sensitivity_analysis_A1','-png','-transparent','-r300')
         end
         
         function sensitivity_analysis_kp_sample()

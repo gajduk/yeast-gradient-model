@@ -1,6 +1,6 @@
 
 classdef InDirectNegativeFeedbackTwoProteinForms < ModelCore
-    %DirectNegativeFeedbackTwoProteinForms
+    %InDirectNegativeFeedbackTwoProteinForms
     %See https://www.overleaf.com/2061351vhqrxw#/5221863/ - label phosphatase negative feedback
     properties (Constant)
         R = 10^-5;%sphere radius
@@ -24,7 +24,7 @@ classdef InDirectNegativeFeedbackTwoProteinForms < ModelCore
             p = u(1);%unphosphorylated form of the protein
             pa = u(2);%active - phosphorylated form of the protein
             phos = u(3);%phophatases
-            ea = self.ka*x^10/self.R^10;%effective rate of activation
+            ea = self.ka*self.get_kinease_activity_normalizer(x,self.R);%effective rate of activation
             pr = pa*self.kp*phos/self.phos0;
 
             c = [1; 1; 1];

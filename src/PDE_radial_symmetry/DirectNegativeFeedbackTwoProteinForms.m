@@ -19,7 +19,7 @@ classdef DirectNegativeFeedbackTwoProteinForms < ModelCore
        function [c,f,s] = pde_fun(self,x,t,u,DuDx)
             p = u(1);%unphosphorylated form of the protein
             pa = u(2);%active - phosphorylated form of the protein
-            ea = self.ka*x^10/self.R^10;%effective rate of activation
+            ea = self.ka*self.get_kinease_activity_normalizer(x,self.R);%effective rate of activation
             pr = self.phosphatase_rate(pa,self.k_cat,self.E0,self.K_M,self.A);%the activity of the phosphotases is proportionally to pa
             
             c = [1; 1];
