@@ -10,7 +10,7 @@ classdef ModelOutput < handle
         steady_state = -1;
         half_fraction = -1;
         R = -1;
-        time_scale = 's';
+        time_scale = 'min';
     end
     
     methods
@@ -134,7 +134,11 @@ classdef ModelOutput < handle
                 normalized = normalized_param;
             end
             average = squeeze(mean(self.sol,2));
-            y = average(:,2)./(average(:,2)+average(:,1));
+            if size(self.sol,3) == 7
+                y = average(:,7)./(average(:,7)+average(:,6));                
+            else
+                y = average(:,2)./(average(:,2)+average(:,1));
+            end
             if normalized
                 y = y./y(end);
             end

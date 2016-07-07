@@ -10,7 +10,7 @@ classdef InDirectNegativeFeedbackTwoProteinForms < ModelCore
         phos_max = InDirectNegativeFeedbackTwoProteinForms.phos0*4;%[nM] maximal concentration of phosphatases
         phos_regulation_rate = .002;% - the speed of phosphatase dynamics
         ka = .008;%s^-1 rate of activation (phosphorylation)
-        A = 1;% strength of the feedback (a free parameter).
+        A = 2;% strength of the feedback (a free parameter).
     end
     
     properties

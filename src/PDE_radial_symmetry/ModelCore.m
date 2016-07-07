@@ -40,12 +40,16 @@ classdef (Abstract) ModelCore
             bcfun = @(xl,ul,xr,ur,t) self.bc_fun(xl,ul,xr,ur,t);%boundary conditions
 
             sol = pdepe(m,pdefun,icfun,bcfun,xmesh,tspan);
-            if size(sol,3) > 1
-                u = sol(:,:,2)./(sol(:,:,2)+sol(:,:,1));
+            if size(sol,3) == 7
+               u =  sol(:,:,7)./(sol(:,:,6)+sol(:,:,7));
             else
-                u = sol(:,:,1);
+                if size(sol,3) > 1
+                    u = sol(:,:,2)./(sol(:,:,2)+sol(:,:,1));
+                else
+                    u = sol(:,:,1);
+                end 
             end
-
+            
             steady_state = u(end,:);
             half = 1;
             for k=1:length(xmesh)
