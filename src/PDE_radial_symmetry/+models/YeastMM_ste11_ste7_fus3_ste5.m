@@ -14,14 +14,14 @@ classdef YeastMM_ste11_ste7_fus3_ste5 < ModelCore
         fus3_0 = 300;%initial concentration [nM]
         ste5_0 = 100;%initial concentration [nM]
         
-        phos_rate_fus3 = 1;%rate of de-phosphorylation of fus3
+        phos_rate_fus3 = .3;%rate of de-phosphorylation of fus3
         phos_rate_ste11 = .1;%rate of de-phosphorylation of ste11
         
-        b_on = .001;%binding on rate of ste11 to ste5
-        alpha = 0;%binding on rate in precense of pheromone
+        b_on = .0001;%binding on rate of ste11 to ste5
+        alpha = .0009%binding on rate in precense of pheromone
         b_off = .5;%binding off rate of ste11 to ste5
         
-        alpha_length = 5;%length in time units
+        alpha_length = 3;%length in time units
         
         b_on_p = 0.00001;%binding on rate of ste11_p to ste5
         b_off_p = 0.5;%binding off rate of ste11_p to ste5
@@ -43,6 +43,7 @@ classdef YeastMM_ste11_ste7_fus3_ste5 < ModelCore
             if t > self.alpha_length
                alpha = 0; 
             end
+            
             ste5 = u(1);%scaffold
             
             ste11 = u(2);%UNphosphorylated ste11
