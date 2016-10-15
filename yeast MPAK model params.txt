@@ -1,0 +1,21 @@
+Kd_Ste5_Ste11 = 0.106 μM
+
+
+Kd_Ste7_Fus3 ~ 5 nM
+
+phosphorylation of ste11 due to fus 3
+kdeg_Ste11_PO4 = ln(2) / 50min = 2.3 * 10-4 s-1.
+
+Phosphatases acting on Fus3
+Km (phosphatase)	kcat (phosphatase)
+0.022 ± 0.005 μM	0.084 ± 0.009 s-1
+
+
+Fus3 binds to GST-Ste5(241-336) with a Kd of 1 μM
+
+
+Fus3 initial concentration 200 nM
+ste5 initial concentration 40 nM
+Ste11 initial concentration 40 nM
+
+Diffusion of ste11 and fus3 4 mikrom-2

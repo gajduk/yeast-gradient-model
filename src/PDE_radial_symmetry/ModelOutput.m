@@ -10,7 +10,7 @@ classdef ModelOutput < handle
         steady_state = -1;
         half_fraction = -1;
         R = -1;
-        time_scale = 's';
+        time_scale = 'min';
     end
     
     methods
@@ -29,18 +29,22 @@ classdef ModelOutput < handle
             end
         end
         
-        function plot_all(self)
+        function plot_all(self,multiplier_)
+           multiplier = 1;
+           if nargin > 1
+               multiplier = multiplier_;
+           end
            set(0,'DefaultAxesFontSize',9)
            set(0,'DefaultTextFontSize',9)
            figure('Position', [100, 100, 900, 196]);
            subplot(1,3,1)
-           self.plot_fraction_internal()
+           self.plot_fraction_internal(multiplier)
            title('')
            subplot(1,3,2)
-           self.plot_fraction_steady_state_internal()
+           self.plot_fraction_steady_state_internal(false,multiplier)
            title('Steady state')
            subplot(1,3,3)
-           self.plot_average_fraction_internal()
+           self.plot_average_fraction_internal(false,multiplier)
            title('Cell average')
            export_fig(self.get_model_name(),'-png','-transparent','-r300')
         end
@@ -62,12 +66,14 @@ classdef ModelOutput < handle
             xlabel({'Distance from','plasma membrane [\mum]'});
             ylim([0 max(self.tspan)])
             ylabel(strcat('Time [',self.time_scale,']'));
-            zlabel('Fraction of active phosphatase');
+            zlabel('Activity [A.U.]');
             %colorbar;
             view([50 52]);
         end
                 
         function plot_all_sol(self)
+            
+            
             [~,~,sols_len] = size(self.sol);
             figure;
             for idx=1:sols_len
@@ -78,21 +84,25 @@ classdef ModelOutput < handle
                 xlabel({'Distance from','plasma membrane [\mum]'});
                 ylim([0 max(self.tspan)])
                 ylabel(strcat('Time [',self.time_scale,']'));
-                zlabel('Fraction of active protein');
+                zlabel('Activity [A.U.]');
             %colorbar;
                 view([50 52]);
             end
         end
         
         
-        function plot_fraction_internal(self)
-            surf(self.xmesh,self.tspan,fliplr(self.fraction_active_protein),'EdgeColor','none');   
+        function plot_fraction_internal(self,multiplier_)
+            multiplier = 1;
+            if nargin > 1
+                multiplier = multiplier_;
+            end
+            surf(self.xmesh,self.tspan,multiplier.*fliplr(self.fraction_active_protein),'EdgeColor','none');   
             self.correct_x_axis();
             title(self.get_model_name());
             xlabel({'Distance from','plasma membrane [\mum]'});
             ylim([0 max(self.tspan)])
             ylabel(strcat('Time [',self.time_scale,']'));
-            zlabel('Fraction of active protein');
+            zlabel('Activity [A.U.]');
             %colorbar;
             view([50 52]);
         end
@@ -102,12 +112,16 @@ classdef ModelOutput < handle
             self.plot_fraction_steady_state_internal()
         end
             
-        function plot_fraction_steady_state_internal(self,normalized_param)
+        function plot_fraction_steady_state_internal(self,normalized_param,multiplier_)
+            multiplier = 1;
+            if nargin > 2
+                multiplier = multiplier_;
+            end
             normalized = false;
             if nargin > 1
                 normalized = normalized_param;
             end
-            y = fliplr(self.fraction_active_protein(end,:));
+            y =  multiplier.*fliplr(self.fraction_active_protein(end,:));
             if normalized
                 y = y./self.fraction_active_protein(end,end);
             end
@@ -118,7 +132,7 @@ classdef ModelOutput < handle
             if normalized
                 ylabel({'Fraction of active protein','Normalized to fraction at PM'});
             else
-                ylabel('Fraction of active protein');
+                ylabel('Activity [A.U.]');
             end
             grid on
         end
@@ -128,13 +142,22 @@ classdef ModelOutput < handle
             self.plot_average_fraction_internal()
         end
         
-        function plot_average_fraction_internal(self,normalized_param)
+        function plot_average_fraction_internal(self,normalized_param,multiplier_)
+            multiplier = 1;
+            if nargin > 2
+                multiplier = multiplier_;
+            end
             normalized = false;
             if nargin > 1
                 normalized = normalized_param;
             end
             average = squeeze(mean(self.sol,2));
-            y = average(:,2)./(average(:,2)+average(:,1));
+            if size(self.sol,3) == 7
+                y = average(:,7)./(average(:,7)+average(:,6));                
+            else
+                y = average(:,2)./(average(:,2)+average(:,1));
+            end
+            y = y*multiplier;
             if normalized
                 y = y./y(end);
             end
@@ -145,7 +168,7 @@ classdef ModelOutput < handle
             if normalized
                 ylabel({'Fraction of active protein','Normalized to avg at SS'});
             else
-                ylabel('Fraction of active protein');
+                ylabel('Activity [A.U.]');
             end
             xlim([0 max(self.tspan)])
             grid on

@@ -127,24 +127,23 @@ classdef MMInDirectNegativeFeedbackTwoProteinForms < ModelCore
             ax.XTickLabel = {'10^{-6}','10^{-3}','10^{0}','10^{3}','10^{6}'};
             grid on
             
-            export_fig('sensitivity_analysis_A1','-png','-transparent','-r300')
+            export_fig('MM_sensitivity_analysis_A1','-png','-transparent','-r300')
         end
         
         function sensitivity_analysis_kp_sample()
             close all
             time_steps = 1000;
-            end_time = 7200;
-            spatial_steps = 50;
-            kps = [0.01,0.1,0.3,1,3,10,100];
+            end_time = 20;
+            spatial_steps = 100;
+            kps = [1,10,50,100,200];
             
             %run models for each value in kps
             res = cell(length(kps),1);
-            temp = InDirectNegativeFeedbackTwoProteinForms();
-            initial_kp = temp.kp;
+            initial_kp = 1;
             
             parfor i=1:length(kps)
-                model = InDirectNegativeFeedbackTwoProteinForms();
-                model.kp = initial_kp*kps(i);
+                model = MMInDirectNegativeFeedbackTwoProteinForms();
+                model.A1 = initial_kp*kps(i);
                 output = model.run(time_steps,end_time,spatial_steps);
                 res{i} = output;
             end
@@ -155,7 +154,7 @@ classdef MMInDirectNegativeFeedbackTwoProteinForms < ModelCore
             legend_labels = cell(1,length(res));
             for i=1:length(res)
                 res{i}.plot_fraction_steady_state_internal(true);
-                legend_labels{i} = sprintf('k_d = %.2f k^0_d',kps(i));
+                legend_labels{i} = sprintf('A_1 = %d',kps(i));
                 hold on
             end
             title('Steady state');
@@ -166,12 +165,12 @@ classdef MMInDirectNegativeFeedbackTwoProteinForms < ModelCore
                 res{i}.plot_average_fraction_internal(true);
                 hold on
             end
-            xlim([0 30])
+            xlim([0 20])
             title('Cell average');
             grid on
             
             legend(legend_labels,'Location','eastoutside');
-            export_fig('sensitivity_analysis_kp_sample','-png','-transparent','-r300')
+            export_fig('MM_sensitivity_analysis_A1_sample','-png','-transparent','-r300')
         end
     end
     
