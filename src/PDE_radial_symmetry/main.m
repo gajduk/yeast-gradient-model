@@ -1,8 +1,8 @@
-close all
-spatial_steps = 21;
-time_steps = 100;
-
-end_time = 30;
-model = RealParam_YeastMM_ste11_ste7_fus3_ste5();
-output1 = model.run(time_steps,end_time,spatial_steps);
-output1.plot_all(1)
+function res= main()
+spatial_steps = 101;
+time_steps = 1000;
+end_time = 10;
+model = models.RealParam_YeastMM_ste11_ste7_fus3_ste5();
+res = model.run(time_steps,end_time,spatial_steps);
+res.plot_extra()
+end
