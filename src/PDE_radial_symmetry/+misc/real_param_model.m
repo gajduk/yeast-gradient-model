@@ -1,5 +1,5 @@
 function res = real_param_model()
-    solve_pde();
+    res = solve_pde();
 end
 function res = hill(x,Km,coef)
     %res = x.^coef ./ (x.^coef+Km);
@@ -24,16 +24,16 @@ function [c,f,s] = pde_fun(x,t,u,DuDx)
     b_off_p = 0.01;%binding off rate of ste11_p to ste5, should be equal to b_off
 
 
-    fus3_act_vkin = 0.035;%activation of fus3 by ste5-ste11 complex
-    fus3_act_KM = 10;%activation of fus3 by ste5-ste11 complex
-    fus3_act_hill = 1;%hill coeficient
+    fus3_act_vkin = 3.5;%activation of fus3 by ste5-ste11 complex
+    fus3_act_KM = 15;%activation of fus3 by ste5-ste11 complex
+    fus3_act_hill = 10;%hill coeficient
     phos_rate_fus3 = .7;%rate of de-phosphorylation of fus3 RealParam
 
 
-    ste11_act_vkin = .5;%activation of ste11 by fus3p
-    ste11_act_KM = 120;%activation of ste11 by fus3p
-    ste11_act_hill = 2;%hill coeficient
-    phos_rate_ste11 = .00;%rate of de-phosphorylation of ste11 RealParam
+    ste11_act_vkin = .1;%activation of ste11 by fus3p
+    ste11_act_KM = 70;%activation of ste11 by fus3p
+    ste11_act_hill = 3;%hill coeficient
+    phos_rate_ste11 = .01;%rate of de-phosphorylation of ste11 RealParam
     
     if t > alpha_length
        alpha = 0; 
@@ -67,8 +67,9 @@ function [c,f,s] = pde_fun(x,t,u,DuDx)
         hill(fus3p,ste11_act_KM,ste11_act_hill);
     ste11_phos = phos_rate_ste11 *  ste11p;
 
-    ste11_act = 0;
-    ste11_phos = 0;
+    %ste11_act = 0;
+    %ste11_phos = 0;
+    
     c = [1; 1; 1; 1; 1; 1; 1];
     f = [0; D; D; 0; 0; D; D] .* DuDx;
     s = [0; 2*D/x; 2*D/x; 0; 0; 2*D/x; 2*D/x] .* DuDx;
@@ -87,7 +88,7 @@ function u0 = ic_fun(x)
     fus3_0 = 200;%initial concentration [nM] RealParam
     ste5_0 = 40;%initial concentration [nM] RealParam
         
-    ste5 = ste5_0*(x>0.9*R);
+    ste5 = ste5_0*(x>0.95*R);
     u0 = [ste5; ste11_0;  0;   0; 0; fus3_0; 0];
 end
 function [pl,ql,pr,qr] = bc_fun(xl,ul,xr,ur,t)
@@ -101,21 +102,23 @@ function [pl,ql,pr,qr] = bc_fun(xl,ul,xr,ur,t)
     qr = [1; 1; 1; 1; 1; 1; 1];
 end
 
-function res = solve_pde()
+function temp = solve_pde()
         R = 3*10^-6;
         xmesh = linspace(0,R,100);
     	tspan = linspace(0,60,100);
         m = 2;
         res = pdepe(m,@pde_fun,@ic_fun,@bc_fun,xmesh,tspan);
         figure;
-        plot(xmesh,fliplr(res(end,:,end)))
-        utils.get_hf(xmesh,fliplr(res(end,:,end)))/R
+       % plot(xmesh,fliplr(res(end,:,3)))
+       % xlabel('Distance from PM')
+       % ylabel('Ste11p')
+       % title(utils.get_hf(xmesh,fliplr(res(end,:,3)))/R)
         
-        %figure('Position',[100,100,1000,600]);
-        %for i=1:7
-        %subplot(2,4,i)
-        %surf(xmesh,tspan,res(:,:,i),'EdgeColor','None')
-        %xlabel('x')
-        %ylabel('t')
-        %end
+        figure('Position',[100,100,1000,600]);
+        for i=1:7
+        subplot(2,4,i)
+        surf(xmesh,tspan,res(:,:,i),'EdgeColor','None')
+        xlabel('x')
+        ylabel('t')
+        end
 end
