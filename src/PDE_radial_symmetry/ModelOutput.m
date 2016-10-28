@@ -29,6 +29,18 @@ classdef ModelOutput < handle
             end
         end
         
+        function plot_extra(self)
+            figure('Position', [100, 100, 700, 400]);
+            surf(self.xmesh,self.tspan,fliplr(self.sol(:,:,end)),'EdgeColor','None');   
+            self.correct_x_axis();
+            xlabel({'Distance from','plasma membrane [\mum]'});
+                
+            ylim([0 max(self.tspan)])
+            ylabel(strcat('Time'));
+            zlabel('Extra');
+            
+        end
+        
         function plot_all(self,multiplier_)
            multiplier = 1;
            if nargin > 1

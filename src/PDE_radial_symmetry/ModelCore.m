@@ -40,7 +40,7 @@ classdef (Abstract) ModelCore
             bcfun = @(xl,ul,xr,ur,t) self.bc_fun(xl,ul,xr,ur,t);%boundary conditions
 
             sol = pdepe(m,pdefun,icfun,bcfun,xmesh,tspan);
-            if size(sol,3) == 7
+            if size(sol,3) >= 7
                u =  sol(:,:,7)./(sol(:,:,6)+sol(:,:,7));
             else
                 if size(sol,3) > 1

@@ -1,10 +1,7 @@
 
-classdef YeastMM_ste11_ste7_fus3_ste5 < ModelCore
+classdef RealParam_YeastMM_ste11_ste7_fus3_ste5 < ModelCore
     
-    %YeastMM_ste11_ste7_fus3_ste5
-    %with michaelis Menten kinetics
-    %See https://www.overleaf.com/2061351vhqrxw#/5221863/ - label michaelis
-    %menten first TAC
+    %RealParam_YeastMM_ste11_ste7_fus3_ste5
     
     properties
         R = 3*10^-6;%sphere radius [m] RealParam
@@ -38,10 +35,10 @@ classdef YeastMM_ste11_ste7_fus3_ste5 < ModelCore
         
     methods
         
-       function self = YeastMM_ste11_ste7_fus3_ste5()
+       function self = RealParam_YeastMM_ste11_ste7_fus3_ste5()
        end
        
-         function [c,f,s] = pde_fun(self,x,t,u,DuDx)
+       function [c,f,s] = pde_fun(self,x,t,u,DuDx)
             alpha = self.alpha;
             if t > self.alpha_length
                alpha = 0; 
@@ -89,6 +86,8 @@ classdef YeastMM_ste11_ste7_fus3_ste5 < ModelCore
        end
        
        function [pl,ql,pr,qr] = bc_fun(self,xl,ul,xr,ur,t)
+            % pR is a constant and the initial concentration of phosphorylated protein at the membrane
+            % D - diffusion constant
             % pl and ql correspond to the left boundary conditions (x = 0), and 
             % pr and qr correspond to the right boundary condition (x = R).
             pl = [0; 0; 0; 0; 0; 0; 0];
@@ -96,6 +95,7 @@ classdef YeastMM_ste11_ste7_fus3_ste5 < ModelCore
             pr = [0; 0; 0; 0; 0; 0; 0];
             qr = [1; 1; 1; 1; 1; 1; 1];
        end
+
     end
     
 end
