@@ -32,8 +32,6 @@ classdef Cascade
         %DEactivation of M2 cytosolic
         V2_phos = 3;
         KMP2 = 0.7;
-        
-
         %phosphorylation of M2 cytosolic
         k3_cat = 9;
         KM3 = 0.5;
