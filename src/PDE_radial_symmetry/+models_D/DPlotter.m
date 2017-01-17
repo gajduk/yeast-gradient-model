@@ -1,4 +1,4 @@
-classdef BindingPlotter < handle
+classdef DPlotter < handle
     
     properties
         titles = {'k','k_b','s'};
@@ -9,7 +9,7 @@ classdef BindingPlotter < handle
     end
     
     methods
-        function self = BindingPlotter(xmesh,tspan,sol)
+        function self = DPlotter(xmesh,tspan,sol)
             self.xmesh = xmesh;
             self.tspan = tspan;
             self.sol = sol;

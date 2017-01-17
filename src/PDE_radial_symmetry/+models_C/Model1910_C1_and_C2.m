@@ -1,4 +1,4 @@
-classdef Model1910
+classdef Model1910_C1_and_C2
     %Kinase has two forms, active and non-active; both of which bind to the
     %membrane with different rates
     %When the kinase is bound to the membrane is activates the substrate
@@ -6,34 +6,38 @@ classdef Model1910
     %substrate deactivates the kinase.
 
     properties
-        kin_a0 = 100;%active kinase freely diffusing
+        R = 10^-5;%sphere radius
+        
+        kin_a0 = 300;%active kinase freely diffusing
         kin_n0 = 0;%NON-active kinase freely diffusing
 
         kin_a_b0 = 0;%active kinase bound to the membrane
         kin_n_b0 = 0;%NON-active kinase bound to the membrane
 
         subst_a0 = 0;%active freely diffusing substrate
-        subst_n0 = 100;%NON-active freely diffusing substrate
+        subst_n0 = 300;%NON-active freely diffusing substrate
 
 
-        x_m = 0.05*10^-5;%this is the membrane
+        x_m = 0.1*10^-5;%this is the membrane
 
-        D_subst = 1*10^-8;%rate of diffusion of the substrate
+        D_subst = 5*10^-12;%rate of diffusion of the substrate
         
         D_kin = 5*10^-12;%rate of diffusion of the kinase
 
         b_on_a = .5;%binding on rate of active kinase
-        b_on_n = .01;%binding on rate of NON-active kinase
 
         b_off_a = .5;%binding off rate of active kinase
-        b_off_n = 1;%binding off rate of NON-active kinase
 
-        s_Km = 50;%Km for activation of the substrate by the kinase
-        s_k_cat = 1000;%k_cat rate of activation of the substrate by the kinase
-        s_phos =  .1;%DE-activation rate of the substrate
+        s_Km = 150;%Km for activation of the substrate by the kinase
+        s_k_cat = 5000;%k_cat rate of activation of the substrate by the kinase
+        s_phos =  0.0000005;%DE-activation rate of the substrate
         
 
-        k_Km = 20;%Km for the DE-activation of the  by the substrate
+        
+        b_on_n = .01;%binding on rate of NON-active kinase
+        b_off_n = 1;%binding off rate of NON-active kinase
+        
+        k_Km = 150;%Km for the DE-activation of the  by the substrate
         k_k_cat = 1;%k_cat rate of DE-activation of the kinase by the susbstrate
         k_act = 1;%activation rate of the kinase
 
@@ -42,7 +46,7 @@ classdef Model1910
     
     methods
 
-        function obj = Model1910(type_)
+        function obj = Model1910_C1_and_C2(type_)
             %type = 1, only kinase that is bound to the membrane can activate
             %the substrate
             %type = 2, only freely diffusing kinase can activate the substrate
@@ -80,8 +84,8 @@ classdef Model1910
             end
             
             
-            s_v_kin = subst_n .* self.s_k_cat .* self.hill(total_b_kin,self.s_Km,1) .* 1000;
-            s_v_phos = subst_a .* self.s_phos;
+            s_v_kin = self.hill(subst_n,self.s_Km,1) .* self.s_k_cat .* self.hill(total_b_kin,self.s_Km,1);
+            s_v_phos = self.hill(subst_a,self.s_Km,1) .* self.s_phos;
             
             k_v_act = kin_n .* self.k_act;
             k_v_deact = kin_a .* self.k_k_cat .* self.hill(subst_a,self.k_Km,1);

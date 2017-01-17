@@ -1,9 +1,10 @@
-classdef CoreBindingModel
+classdef D2Model
+
     % Three variables,
     % kinase - k ; bound_kinase - k_b ; substrate - s
     % the kinase binds and unbinds to/from the membrane
     % kinase and substrate are freely diffusing
-    % both the bound and unbound kinase can activate the substrate
+    % ONLY the bound kinase can activate the substrate
     
     %Membrane            | <------
     %                    V       |           
@@ -59,7 +60,7 @@ classdef CoreBindingModel
 
 			v_phos_s = self.s_phos .* s ./ ( self.KMPs + s );
 
-			total_k = k + k_b;
+			total_k = k_b;
 			
 			v_kin_s = self.ks_cat .* (1-s) .* total_k ./ ( self.KMs + total_k);
 		end
@@ -106,7 +107,7 @@ classdef CoreBindingModel
 
             sol = pdepe(m,pdefun,icfun,bcfun,xmesh,tspan);
             
-            res = membrane_binding.BindingPlotter(xmesh,tspan,sol);
+            res = models_D.DPlotter(xmesh,tspan,sol);
         end
 
 	end    

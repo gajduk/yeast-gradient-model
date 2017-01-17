@@ -1,4 +1,4 @@
-function main()
+function sens_anal_all()
 	params = {'A','b_on','b_off','k_phos','ks_cat','s_phos'};
 	for i=1:length(params)
 		param = params{i};
@@ -11,7 +11,7 @@ function sens_anal(param)
 	kss = linspace(-10,10,7);
 	sols = cell(1,length(kss));
 	parfor k=1:length(kss)
-		model = membrane_binding.CoreBindingModel();
+		model = models_D.D1Model();
 		ks = 2.^kss(k);
 		model.(param) = model.(param) * ks;
 		plotter = model.run(100,100,50);
